@@ -51,9 +51,9 @@ class EmbeddingSim(keras.layers.Layer):
 
     def get_config(self):
         config = {
-            'initializer': self.initializer,
-            'regularizer': self.regularizer,
-            'constraint': self.constraint,
+            'initializer': keras.initializers.serialize(self.initializer),
+            'regularizer': keras.regularizers.serialize(self.regularizer),
+            'constraint': keras.constraints.serialize(self.constraint),
         }
         base_config = super(EmbeddingSim, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
