@@ -30,6 +30,7 @@ class EmbeddingSim(keras.layers.Layer):
     """Calculate similarity between features and token embeddings with bias term."""
 
     def __init__(self,
+                 use_bias=True,
                  initializer='zeros',
                  regularizer=None,
                  constraint=None,
@@ -37,6 +38,7 @@ class EmbeddingSim(keras.layers.Layer):
         """Initialize the layer.
 
         :param output_dim: Same as embedding output dimension.
+        :param use_bias: Whether to use bias term.
         :param initializer: Initializer for bias.
         :param regularizer: Regularizer for bias.
         :param constraint: Constraint for bias.
@@ -44,6 +46,7 @@ class EmbeddingSim(keras.layers.Layer):
         """
         super(EmbeddingSim, self).__init__(**kwargs)
         self.supports_masking = True
+        self.use_bias = use_bias
         self.initializer = keras.initializers.get(initializer)
         self.regularizer = keras.regularizers.get(regularizer)
         self.constraint = keras.constraints.get(constraint)
@@ -51,6 +54,7 @@ class EmbeddingSim(keras.layers.Layer):
 
     def get_config(self):
         config = {
+            'use_bias': self.use_bias,
             'initializer': keras.initializers.serialize(self.initializer),
             'regularizer': keras.regularizers.serialize(self.regularizer),
             'constraint': keras.constraints.serialize(self.constraint),
@@ -59,15 +63,16 @@ class EmbeddingSim(keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
     def build(self, input_shape):
-        embed_shape = input_shape[1]
-        token_num = embed_shape[0]
-        self.bias = self.add_weight(
-            shape=(token_num,),
-            initializer=self.initializer,
-            regularizer=self.regularizer,
-            constraint=self.constraint,
-            name='bias',
-        )
+        if self.use_bias:
+            embed_shape = input_shape[1]
+            token_num = embed_shape[0]
+            self.bias = self.add_weight(
+                shape=(token_num,),
+                initializer=self.initializer,
+                regularizer=self.regularizer,
+                constraint=self.constraint,
+                name='bias',
+            )
         super(EmbeddingSim, self).build(input_shape)
 
     def compute_output_shape(self, input_shape):
@@ -80,7 +85,9 @@ class EmbeddingSim(keras.layers.Layer):
 
     def call(self, inputs, mask=None, **kwargs):
         inputs, embeddings = inputs
-        outputs = K.bias_add(K.dot(inputs, K.transpose(embeddings)), self.bias)
+        outputs = K.dot(inputs, K.transpose(embeddings))
+        if self.use_bias:
+            outputs = K.bias_add(outputs, self.bias)
         return keras.activations.softmax(outputs)
 
 
