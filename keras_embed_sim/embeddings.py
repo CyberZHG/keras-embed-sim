@@ -1,5 +1,5 @@
-import keras
-import keras.backend as K
+from .backend import keras
+from .backend import backend as K
 
 __all__ = ['EmbeddingRet', 'EmbeddingSim', 'get_custom_objects']
 
@@ -65,7 +65,7 @@ class EmbeddingSim(keras.layers.Layer):
     def build(self, input_shape):
         if self.use_bias:
             embed_shape = input_shape[1]
-            token_num = embed_shape[0]
+            token_num = int(embed_shape[0])
             self.bias = self.add_weight(
                 shape=(token_num,),
                 initializer=self.initializer,
