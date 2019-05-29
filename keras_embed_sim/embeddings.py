@@ -22,7 +22,7 @@ class EmbeddingRet(keras.layers.Embedding):
     def call(self, inputs):
         return [
             super(EmbeddingRet, self).call(inputs),
-            self.embeddings,
+            self.embeddings + 0.0,
         ]
 
 
@@ -34,6 +34,7 @@ class EmbeddingSim(keras.layers.Layer):
                  initializer='zeros',
                  regularizer=None,
                  constraint=None,
+                 stop_gradient=False,
                  **kwargs):
         """Initialize the layer.
 
@@ -42,6 +43,7 @@ class EmbeddingSim(keras.layers.Layer):
         :param initializer: Initializer for bias.
         :param regularizer: Regularizer for bias.
         :param constraint: Constraint for bias.
+        :param stop_gradient: Whether to stop gradient for input embedding.
         :param kwargs: Arguments for parent class.
         """
         super(EmbeddingSim, self).__init__(**kwargs)
@@ -50,6 +52,7 @@ class EmbeddingSim(keras.layers.Layer):
         self.initializer = keras.initializers.get(initializer)
         self.regularizer = keras.regularizers.get(regularizer)
         self.constraint = keras.constraints.get(constraint)
+        self.stop_gradient = stop_gradient
         self.bias = None
 
     def get_config(self):
@@ -58,6 +61,7 @@ class EmbeddingSim(keras.layers.Layer):
             'initializer': keras.initializers.serialize(self.initializer),
             'regularizer': keras.regularizers.serialize(self.regularizer),
             'constraint': keras.constraints.serialize(self.constraint),
+            'stop_gradient': self.stop_gradient,
         }
         base_config = super(EmbeddingSim, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
@@ -85,6 +89,8 @@ class EmbeddingSim(keras.layers.Layer):
 
     def call(self, inputs, mask=None, **kwargs):
         inputs, embeddings = inputs
+        if self.stop_gradient:
+            embeddings = K.stop_gradient(embeddings)
         outputs = K.dot(inputs, K.transpose(embeddings))
         if self.use_bias:
             outputs = K.bias_add(outputs, self.bias)

@@ -16,7 +16,10 @@ class TestEmbeddings(TestCase):
             mask_zero=True,
             name='Embedding',
         )(input_layer)
-        output_layer = EmbeddingSim(name='Embed-Sim')([embed, embed_weights])
+        output_layer = EmbeddingSim(
+            stop_gradient=True,
+            name='Embed-Sim',
+        )([embed, embed_weights])
         model = keras.models.Model(inputs=input_layer, outputs=output_layer)
         model.compile(optimizer='adam', loss='mse')
         model_path = os.path.join(tempfile.gettempdir(), 'test_embed_sim_%f.h5' % np.random.random())

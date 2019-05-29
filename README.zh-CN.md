@@ -6,7 +6,7 @@
 ![Downloads](https://img.shields.io/pypi/dm/keras-embed-sim.svg)
 ![License](https://img.shields.io/pypi/l/keras-embed-sim.svg)
 
-Compute the similarity between the outputs and the embeddings.
+计算输出与嵌入层的相似性。
 
 ## Install
 
@@ -15,6 +15,8 @@ pip install keras-embed-sim
 ```
 
 ## Usage
+
+`EmbeddingRet`在一般的嵌入层的基础上会同时返回嵌入的结果和权重，权重可用于`EmbeddingSim`的第二个输入，结果经过softmax，相当于属于某个嵌入的概率。
 
 ```python
 import keras
@@ -30,3 +32,5 @@ embed, embed_weights = EmbeddingRet(
 
 output_layer = EmbeddingSim()([embed, embed_weights])
 ```
+
+如果将`EmbeddingSim`中的参数`stop_gradient`设置为`True`，将阻断该层对嵌入权重的梯度传播。
