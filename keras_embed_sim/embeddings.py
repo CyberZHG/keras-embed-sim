@@ -85,6 +85,8 @@ class EmbeddingSim(keras.layers.Layer):
         return feature_shape[:-1] + (token_num,)
 
     def compute_mask(self, inputs, mask=None):
+        if mask is None:
+            return None
         return mask[0]
 
     def call(self, inputs, mask=None, **kwargs):
