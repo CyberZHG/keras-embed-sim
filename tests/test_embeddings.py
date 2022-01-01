@@ -1,8 +1,10 @@
 import os
 import tempfile
-import numpy as np
 from unittest import TestCase
-from keras_embed_sim.backend import keras
+
+import numpy as np
+from tensorflow import keras
+
 from keras_embed_sim import EmbeddingRet, EmbeddingSim, get_custom_objects
 
 
